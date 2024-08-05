@@ -1,6 +1,7 @@
 import streamlit as st
 from bs4 import BeautifulSoup
 import requests
+from openai import OpenAIError
 from googlesearch import search
 from dotenv import load_dotenv
 import openai
