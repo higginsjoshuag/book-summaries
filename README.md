@@ -1,6 +1,6 @@
-# 📚 LangChain Book Summary Agent
+# 📚 Book Summary Agent
 
-LangChain Book Summary Agent is an application that extracts book titles and authors from text descriptions and provides summaries by scraping the web. The application uses GPT-4 and web scraping techniques to deliver accurate and comprehensive book summaries.
+Book Summary Agent is an application that extracts book titles and authors from text descriptions and provides summaries by scraping the web. The application uses GPT-4 and web scraping techniques to deliver accurate and comprehensive book summaries.
 
 ## Features
 
