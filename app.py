@@ -1,6 +1,4 @@
 import streamlit as st
-from openai import OpenAIError
-from langchain.prompts import PromptTemplate
 from bs4 import BeautifulSoup
 import requests
 from googlesearch import search
@@ -10,6 +8,7 @@ import os
 import time
 import random
 import json
+import sys
 
 # Function to search and scrape book summaries
 def search_and_scrape(book_title, num_results=10):
@@ -43,8 +42,6 @@ def extract_summary(soup):
         return " ".join(p.get_text() for p in paragraphs)
     return None
 
-import openai
-
 class BookSummaryAgent:
     def __init__(self, model_name):
         self.model_name = model_name
@@ -55,7 +52,6 @@ class BookSummaryAgent:
         try:
             response = self.client.chat.completions.create(
                 model=self.model_name,
-                response_format={ "type": "json_object" },
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": (
@@ -67,13 +63,13 @@ class BookSummaryAgent:
                     )}
                 ]
             )
-            extracted_info = response.choices[0].message.content.strip()
+            extracted_info = response.choices[0].message["content"].strip()
             extracted_data = json.loads(extracted_info)
             extracted_title = extracted_data.get("title", "No book title found")
             author = extracted_data.get("author", "Unknown")
         except json.JSONDecodeError:
             return None, "Hmm... couldn't parse the input properly."
-        except openai.OpenAIError as e:
+        except OpenAIError as e:
             return None, f"OpenAI Error: {str(e)}"
 
         if extracted_title.lower() == "no book title found":
@@ -98,8 +94,8 @@ class BookSummaryAgent:
                     )}
                 ]
             )
-            summary = response.choices[0].message.content.strip()
-        except openai.OpenAIError as e:
+            summary = response.choices[0].message["content"].strip()
+        except OpenAIError as e:
             return f"OpenAI Error: {str(e)}"
         return summary
     
@@ -173,5 +169,4 @@ def run_streamlit(agent):
             st.error("Please enter some text to analyze.")
 
 if __name__ == "__main__":
-    import sys
     main()
