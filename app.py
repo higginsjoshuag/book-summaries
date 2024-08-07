@@ -10,9 +10,10 @@ import time
 import random
 import json
 import sys
+from pprint import pprint
 
 # Function to search and scrape book summaries
-def search_and_scrape(book_title, num_results=10):
+def search_and_scrape(book_title, num_results=5):
     query = f"{book_title} book summary"
     search_results = search(query, num_results=num_results)
 
@@ -64,12 +65,26 @@ class BookSummaryAgent:
                     )}
                 ]
             )
-            extracted_info = response.choices[0].message["content"].strip()
-            extracted_data = json.loads(extracted_info)
-            extracted_title = extracted_data.get("title", "No book title found")
-            author = extracted_data.get("author", "Unknown")
-        except json.JSONDecodeError:
-            return None, "Hmm... couldn't parse the input properly."
+            extracted_info = response.choices[0].message.content
+            print(f"Raw response content: {extracted_info}")
+
+            # Clean up the response by removing unwanted formatting markers
+            if extracted_info.startswith("```json"):
+                extracted_info = extracted_info[7:]  # Remove the ```json marker
+            if extracted_info.endswith("```"):
+                extracted_info = extracted_info[:-3]  # Remove the ending ``` marker
+            extracted_info = extracted_info.strip()  # Strip any extra whitespace
+
+            # Check if the response is a valid JSON string
+            try:
+                extracted_data = json.loads(extracted_info)
+                pprint(extracted_data)
+                extracted_title = extracted_data.get("title", "No book title found")
+                author = extracted_data.get("author", "Unknown")
+            except json.JSONDecodeError as json_err:
+                print(f"JSON decoding failed: {str(json_err)}")
+                return None, "Hmm... couldn't parse the input properly."
+
         except OpenAIError as e:
             return None, f"OpenAI Error: {str(e)}"
 
@@ -95,7 +110,7 @@ class BookSummaryAgent:
                     )}
                 ]
             )
-            summary = response.choices[0].message["content"].strip()
+            summary = response.choices[0].message.content.strip()
         except OpenAIError as e:
             return f"OpenAI Error: {str(e)}"
         return summary
@@ -171,3 +186,5 @@ def run_streamlit(agent):
 
 if __name__ == "__main__":
     main()
+
+# can you give me a summary of the book the algebra of wealth by scott galloway?    
